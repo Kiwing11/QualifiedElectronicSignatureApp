@@ -17,11 +17,11 @@ class App(ctk.CTk):
         ctk.set_default_color_theme("dark-blue")
         self.set_frame(MainFrame)
 
-    def set_frame(self, frame, *args):
+    def set_frame(self, frame, *args, **kwargs):
         if self.frame is not None:
             self.frame.pack_forget()
 
-        self.frame = frame(self, self, *args)
+        self.frame = frame(self, self, *args, **kwargs)
 
 
 app = App()

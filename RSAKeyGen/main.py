@@ -8,8 +8,9 @@ while True:
 
     try:
         private_key, public_key = generate_rsa_keys()
-        nonce, ciphertext, tag = encrypt_with_aes(private_key, pin)
-        save_keys(public_key, ciphertext)
+        iv, ciphertext = encrypt_with_aes(private_key, pin)
+        private_key = iv + ciphertext
+        save_keys(private_key, public_key)
         print("Keys were generated and saved successfully.")
     except Exception as e:
         print(f"An error occurred while generating keys: {str(e)}")

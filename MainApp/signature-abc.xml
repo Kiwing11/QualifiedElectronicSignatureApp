@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<XAdES>
+	<FileInfo>
+		<Size>8</Size>
+		<Extension>txt</Extension>
+		<ModificationDate>2024-06-10 14:35:57.685883</ModificationDate>
+		<UserInfo>
+			<SigningUserName>kiwin</SigningUserName>
+			<SigningUserMAC>0x8bfb854c951</SigningUserMAC>
+		</UserInfo>
+	</FileInfo>
+	<EncryptedHash>qg9aeVWVkxBtkzT1TaqJ9Fm5X6U/Q/+NJid//DDYdeA3r+z0kDu0Hpz84ItNui4FjZk5TeB471E5/tvQOpIAay4Or7ihVYqDykWIMtb5g5emrbjGwyCxEliWw4WzzsG7xVvZPtIdt+Py7ExQa5/eakv5ClYOjV2qF0FlTzVu5alQtceNV6Lk5CgexrEZTt+PfDOoUcPrCnuz9seB+ZBxpRkyJ9NBLrMIkUB4+AvBrkjhYL8CbmKZKVYLt7QxogPLR5lFl3qux//xmsa9dio49ySLhkiXYFquM/o2iw3N/FLxp1mk1Y/k5PaOsLv7RVziAhO3ZpmrVIxjvFc0GsfPCq4+RtasmDUow/1eOKEeViZ2qzGJz8PEq5ELvORYGBYoAJ0GJBqR29LmrHNvaCxuIMXz9KWJoru9bfWq1rVEHzMKkIobFEqVdcKvADWWcpgkXdiLLOpsFwX+jWtvYkQRdPtVqSKtN7+cFmOC19O7g3jskhFHv2PGSmlePKugcC6LRd1Wn6x0XwJsM/HPVhJTf+ZisAsi/uBU2Hn/ttfSdGYdOly2nb6Fg/bxR69WShfcjd/it9SI7MwAY8EYMtKiMOsML6naoHLZrZ3N9YQo1RHZZ5UxvPeHvGXg3qH11vIAtaT/OLqIpyZ9OQgc0acUoccIBm8t5ZrrU3qqqis0Nqg=</EncryptedHash>
+	<Timestamp>2024-06-10 14:36:17.053372</Timestamp>
+</XAdES>

@@ -4,11 +4,11 @@ import os
 import hashlib
 import base64
 from Crypto.PublicKey import RSA
-from Crypto.Cipher import AES
+from Crypto.Cipher import AES, PKCS1_OAEP
 from Crypto.Util.Padding import pad, unpad
 from Crypto.Hash import SHA256
 from Crypto.Signature import PKCS1_v1_5
-from xml.etree.ElementTree import Element, SubElement, tostring, indent
+from xml.etree import ElementTree as ET
 from xml.dom.minidom import parseString
 from uuid import getnode as get_mac
 from datetime import datetime
@@ -82,34 +82,84 @@ def sign_file(file_path, key):
     signature = signer.sign(file_hash)
 
     # creating XML signature
-    signature_xml = Element("XAdES")
+    signature_xml = ET.Element("XAdES")
 
-    file_info = SubElement(signature_xml, "FileInfo")
+    file_info = ET.SubElement(signature_xml, "FileInfo")
     file_info_dict = {
         "Size": str(os.path.getsize(file_path)),
         "Extension": os.path.splitext(file_path)[1][1:],  # remove leading dot
         "ModificationDate": str(datetime.fromtimestamp(os.path.getmtime(file_path)))
     }
     for key, value in file_info_dict.items():
-        SubElement(file_info, key).text = value
+        ET.SubElement(file_info, key).text = value
 
-    user_info = SubElement(file_info, "UserInfo")
+    user_info = ET.SubElement(file_info, "UserInfo")
     user_info_dict = {
         "SigningUserName": str(os.getlogin()),
         "SigningUserMAC": str(hex(get_mac()))
     }
     for key, value in user_info_dict.items():
-        SubElement(user_info, key).text = value
+        ET.SubElement(user_info, key).text = value
 
-    SubElement(signature_xml, "EncryptedHash").text = base64.b64encode(signature).decode()
-    SubElement(signature_xml, "Timestamp").text = str(datetime.now())
+    ET.SubElement(signature_xml, "EncryptedHash").text = base64.b64encode(signature).decode()
+    ET.SubElement(signature_xml, "Timestamp").text = str(datetime.now())
 
     # prettify XML string
-    signature_xml_str = parseString(tostring(signature_xml)).toprettyxml()
+    signature_xml_str = parseString(ET.tostring(signature_xml)).toprettyxml()
 
     # saving new signature
     signature_file_name = f"signature-{os.path.splitext(os.path.basename(file_path))[0]}.xml"
     with open(signature_file_name, "w") as xml_file:
         xml_file.write(signature_xml_str)
 
-    return signature_xml_str
+    return signature_xml_str, signature_file_name
+
+def verify_signature(file_path, public_key_path, xml_file_path):
+
+    with open(file_path, "rb") as file:
+        file_content = file.read()
+
+    # calculating hash of file
+    file_hash = SHA256.new(file_content)
+
+    # reading signature
+    with open(xml_file_path, "r") as signature_file:
+        signature_xml = signature_file.read()
+
+    # parsing XML signature
+    signature_tree = ET.fromstring(signature_xml)
+
+    with open(public_key_path, 'r') as key_file:
+        public_key = RSA.import_key(key_file.read())
+
+    # decrypting hash
+    signature = base64.b64decode(signature_tree.find("EncryptedHash").text)
+
+    # create a new verifier with the public key
+    verifier = PKCS1_v1_5.new(public_key)
+
+    # verify the signature
+    is_signature_valid = verifier.verify(file_hash, signature)
+    print(f"Is signature valid: {is_signature_valid}")
+
+    return is_signature_valid
+
+def encrypt_file(file_path, public_key_path):
+    try:
+        with open(file_path, "rb") as file:
+            file_content = file.read()
+
+        with open(public_key_path, "rb") as key_file:
+            public_key = RSA.import_key(key_file.read())
+
+        cipher = PKCS1_OAEP.new(public_key)
+        encrypted_file = cipher.encrypt(file_content)
+
+        with open(file_path, "wb") as file:
+            file.write(encrypted_file)
+
+        return encrypted_file
+
+    except (ValueError, KeyError) as e:
+        print(f"An error occurred during decryption: {e}")
+        return None

@@ -163,3 +163,20 @@ def encrypt_file(file_path, public_key_path):
     except (ValueError, KeyError) as e:
         print(f"An error occurred during decryption: {e}")
         return None
+
+def decrypt_file(file_path, decrypt_key):
+    try:
+        with open(file_path, "rb") as file:
+            encrypted_file = file.read()
+
+        cipher = PKCS1_OAEP.new(decrypt_key)
+        decrypted_file = cipher.decrypt(encrypted_file)
+
+        with open(file_path, "wb") as file:
+            file.write(decrypted_file)
+
+        return decrypted_file
+
+    except (ValueError, KeyError) as e:
+        print(f"An error occurred during encryption: {e}")
+        return None

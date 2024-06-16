@@ -15,10 +15,10 @@ class MainFrame(ctk.CTkFrame):
         verify_the_signature_button = (ctk.CTkButton(self, text="Verify the signature", font=("Courier new", 20), width=app.width*0.5, height=app.height*0.2, command=lambda: app.set_frame(VerifySignatureFrame))
                           .grid(row=1, column=0, pady=(10, 0)))
 
-        decrypt_button = (ctk.CTkButton(self, text="Encrypt", font=("Courier new", 20), width=app.width*0.5, height=app.height*0.2, command=lambda: app.set_frame(EncryptFrame))
+        encrypt_button = (ctk.CTkButton(self, text="Encrypt", font=("Courier new", 20), width=app.width*0.5, height=app.height*0.2, command=lambda: app.set_frame(EncryptFrame))
                           .grid(row=2, column=0, pady=(10, 0)))
 
-        encrypt_button = (ctk.CTkButton(self, text="Decrypt", font=("Courier new", 20), width=app.width*0.5, height=app.height * 0.2, command=lambda: app.set_frame(DecryptFrame))
+        decrypt_button = (ctk.CTkButton(self, text="Decrypt", font=("Courier new", 20), width=app.width*0.5, height=app.height * 0.2, command=lambda: app.set_frame(DecryptFrame))
                           .grid(row=3, column=0, pady=(10, 10)))
 
 
@@ -35,7 +35,7 @@ class NoExternalDevicesFrame(ctk.CTkFrame):
 
 
 class ExternalDevicesFrame(ctk.CTkFrame):
-    def __init__(self, parent:  any, app, external_storage, pem_files, show_invalid_pin=False):
+    def __init__(self, parent:  any, app, external_storage, pem_files, show_invalid_pin=False, is_for_signing=True):
         super().__init__(parent)
         self.pack(pady=20, padx=20, fill='both', expand=True)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
@@ -65,7 +65,7 @@ class ExternalDevicesFrame(ctk.CTkFrame):
             pin_entry.grid(row=2, column=0, padx=10, pady=(0, 20))
 
             decrypt_button = ctk.CTkButton(self, text="Decrypt", font=("Courier new", 20), width=app.width*0.5, height=app.height*0.1,
-                                           command=lambda: app_controller.decrypt_click(app, combobox.get(), pin_entry.get(), external_storage, pem_files))
+                                           command=lambda: app_controller.decrypt_click(app, combobox.get(), pin_entry.get(), external_storage, pem_files, is_for_signing=is_for_signing))
             decrypt_button.grid(row=4, column=0, pady=(10, 20))
 
         return_button = ctk.CTkButton(self, text="Return", font=("Courier new", 20), width=app.width*0.5, height=app.height*0.1,
@@ -275,7 +275,7 @@ class DecryptFrame(ctk.CTkFrame):
 
         file_button = ctk.CTkButton(self, text="Choose File", font=("Courier new", 20), width=app.width * 0.5,
                                     height=app.height * 0.1,
-                                    command=lambda: app_controller.choose_file_click(app))
+                                    command=lambda: app_controller.decrypt_choose_file_click(app))
         file_button.grid(row=0, column=0, pady=(10, 0))
 
         if file_path is not None:
@@ -287,9 +287,9 @@ class DecryptFrame(ctk.CTkFrame):
                                                width=app.width * 0.5, height=app.height * 0.1)
                 file_path_label.grid(row=3, column=0, pady=10, sticky="n")
 
-                sign_button = ctk.CTkButton(self, text="Sign file", font=("Courier new", 20), width=app.width * 0.5,
+                sign_button = ctk.CTkButton(self, text="Next", font=("Courier new", 20), width=app.width * 0.5,
                                             height=app.height * 0.1,
-                                            command=lambda: app_controller.sign_click(app, file_path))
+                                            command=lambda: app_controller.decrypt_next_click(app, file_path))
                 sign_button.grid(row=4, column=0, pady=10, sticky="n")
             else:
                 text_label = ctk.CTkLabel(master=self, text="Wrong file extension", font=("Courier new", 20),
@@ -341,6 +341,44 @@ class SelectPublicKeyFrame(ctk.CTkFrame):
                                       command=lambda: app.set_frame(MainFrame))
         return_button.grid(row=4, column=0, pady=(10, 10))
 
+class SelectPrivateKeyFrame(ctk.CTkFrame):
+    def __init__(self, parent: any, app, private_key_file_path=None, valid_file_extension=True,
+                 file_path=None):
+        super().__init__(parent)
+        self.pack(pady=20, padx=20, fill='both', expand=True)
+        self.grid_rowconfigure((0, 1, 2, 3), weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        private_key_file_button = ctk.CTkButton(self, text="Choose private key", font=("Courier new", 20),
+                                               width=app.width * 0.5, height=app.height * 0.1,
+                                               command=lambda: app_controller.decrypt_choose_private_key_click(app))
+        private_key_file_button.grid(row=0, column=0, pady=(10, 0))
+
+        if private_key_file_path is not None:
+            if valid_file_extension:
+                text_label = ctk.CTkLabel(master=self, text="Chosen private key:", font=("Courier new", 20))
+                text_label.grid(row=1, column=0, pady=10, padx=(10, 5), sticky="ew")
+
+                public_key_file_path_label = ctk.CTkLabel(master=self, text=private_key_file_path, fg_color="Green",
+                                                          font=("Courier new", 20),
+                                                          width=app.width * 0.5, height=app.height * 0.1)
+                public_key_file_path_label.grid(row=2, column=0, pady=10, padx=(10, 5))
+
+                encrypt_button = ctk.CTkButton(self, text="Decrypt file", font=("Courier new", 20), width=app.width * 0.5,
+                                               height=app.height * 0.1,
+                                               command=lambda: app_controller.decrypt_file_click(app, file_path=file_path,
+                                                                                                 private_key_file_path=private_key_file_path))
+
+                encrypt_button.grid(row=3, column=0, pady=10, padx=(10, 5))
+            else:
+                text_label = ctk.CTkLabel(master=self, text="Wrong file extension", font=("Courier new", 20),
+                                          text_color="red")
+                text_label.grid(row=1, column=0, pady=20, padx=(10, 5))
+
+        return_button = ctk.CTkButton(self, text="Return", font=("Courier new", 20), width=app.width * 0.5,
+                                      height=app.height * 0.1,
+                                      command=lambda: app.set_frame(MainFrame))
+        return_button.grid(row=4, column=0, pady=(10, 10))
 class ShowResultFrame(ctk.CTkFrame):
     def __init__(self, parent: any, app, result="", success=True, path=None):
         super().__init__(parent)
